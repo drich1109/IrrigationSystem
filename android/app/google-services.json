@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "364943398630",
+    "project_id": "acsi-23ecc",
+    "storage_bucket": "acsi-23ecc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:364943398630:android:818b0b276cb472f2aa8d27",
+        "android_client_info": {
+          "package_name": "com.vistalkmobileapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBKHNMdXiYN7khnLA06Cbo172Y3Nf1_Ano"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
