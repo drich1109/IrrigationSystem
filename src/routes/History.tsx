@@ -1,156 +1,250 @@
-import { Animated, Dimensions, SafeAreaView, ScrollView, Text, TouchableOpacity, View, Switch } from "react-native";
-import LinearGradient from "react-native-linear-gradient";
-import BackIcon from "../assets/svg/BackIcon";
-import { StackScreenProps } from "@react-navigation/stack";
-import { RootStackParamList } from "../../types";
-import { PieChart } from "react-native-chart-kit";
-import React, { useRef, useState } from "react";
-import { PronunciationProgressDto, PronunciationProgressListDto } from "./type";
-import { useFocusEffect } from "@react-navigation/native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { pronunciationProgressChart, pronunciationProgressList } from "./repo";
-import CircleIcon from "../assets/svg/CircleIcon";
+
+import React, { useState, useEffect } from 'react';
+import { RootStackParamList } from '../../types';
+import { StackScreenProps } from '@react-navigation/stack';
+import { SafeAreaView, Text, TouchableOpacity, View } from 'react-native';
+import HomeIcon from '../assets/svg/HomeIcon';
+import CircleIcon from '../assets/svg/CircleIcon';
 
 type Props = StackScreenProps<RootStackParamList, 'History'>;
 
-const screenWidth = Dimensions.get('window').width;
+const History: React.FC<Props> = ({ navigation }) => {
+  /*  const [modalVisible, setModalVisible] = useState(false);
+   const [leaderBoardVisible, setLeaderBoardVisible] = useState(false);
+   const [dailyTaskVisible, setdailyTaskVisible] = useState(false);
+   const [notificationVisible, setNotificationVisible] = useState(false);
+   const [currentSection, setCurrentSection] = useState<SectionDetails | null>(null);
+   const [activeScreen] = useState<keyof RootStackParamList | null>('Dashboard');
+   const [languageDetails, setLanguageDetails] = useState<Languages>();
+   const [userDetails, setUserDetails] = useState<UserProfileDto>();
+   const [fileUrl, setFileUrl] = useState<string | null>(null);
+   const unit = useNavigation<UnitScreenNavigationProp>();
+   const [sections, setSections] = useState<SectionDetails[]>([]);
+   const [dailyTasks, setdailyTasks] = useState<DailyTaskDto[]>([]);
+   const [expandedTasks, setExpandedTasks] = useState<{ [key: number]: boolean }>({});
+   const [notifications, setNotifications] = useState<NotificationsDto[]>([]);
+   const [notificationCount, setNotifCount] = useState<number>(0);
+   const [userId, setUserID] = useState<string>("");
+   const [isBuying, setIsBuying] = useState<boolean>(false);
+   const [loadingMessage, setLoadingMessage] = useState<string>("");
+   const [secWord, setSecWord] = useState<string>("");
+   const [notifWord, setNotifWord] = useState<string>("");
+   const [taskWord, setTaskWord] = useState<string>("");
+   const [letWord, setLetWord] = useState<string>("");
+   const [showSection, setShowSection] = useState<boolean>(true);
+   const [showNotif, setShowNotif] = useState<boolean>(true);
+   const [showTask, setShowTask] = useState<boolean>(true);
+   const [showLet, setShowLet] = useState<boolean>(true);
+   const toggleDescription = (taskID: number) => {
+     setExpandedTasks((prev) => ({
+       ...prev,
+       [taskID]: !prev[taskID],
+     }));
+   };
+ 
+   const handleBackPress = () => {
+     BackHandler.exitApp();
+     return true;
+   };
+ 
+   useEffect(() => {
+     const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackPress);
+ 
+     return () => backHandler.remove();
+   }, []);
+ 
+ 
+ 
+   const fetchUserData = async () => {
+     try {
+       const userID = await AsyncStorage.getItem('userID');
+       const languageID = await AsyncStorage.getItem('languageId');
+       console.log(languageID)
+       switch (languageID) {
+         case "1": setSecWord("Seksyon"); break;
+         case "2": setSecWord("Seksyon"); break;
+         case "3": setSecWord("Seksyon"); break;
+         default:
+           setSecWord("Section");
+           break;
+       }
+       switch (languageID) {
+         case "1": setNotifWord("Mga Pahibalo"); break;
+         case "2": setNotifWord("Abiso"); break;
+         case "3": setNotifWord("Mga Pahibaro"); break;
+         default:
+           setNotifWord("Notification");
+           break;
+       }
+       switch (languageID) {
+         case "1": setTaskWord("Buluhaton Sa Adlaw"); break;
+         case "2": setTaskWord("Buluhaton Sa Adlaw"); break;
+         case "3": setTaskWord("Buruhaton Sa Adlaw"); break;
+         default:
+           setTaskWord("Daily Task");
+           break;
+       }
+       switch (languageID) {
+         case "1": setLetWord("Sugdan Nato"); break;
+         case "2": setLetWord("Magsugod Kita"); break;
+         case "3": setLetWord("Magtikang Kita"); break;
+         default:
+           setLetWord("Let's Begin");
+           break;
+       }
+       setUserID(userID ?? "");
+       const result = await getUserLanguage(Number(userID));
+       setLanguageDetails(result.data);
+       const userResult = await getUserDetails(Number(userID));
+       setUserDetails(userResult.data);
+       const sectionResult = await getSections(Number(userID), result.data.languageID);
+ 
+       setSections(sectionResult.data)
+       if (userResult.data.imagePath) {
+         setFileUrl(userResult.data.imagePath);
+       }
+ 
+       const dailyTaskResult = await getDailyTasks(Number(userID));
+       console.log(dailyTaskResult)
+       setdailyTasks(dailyTaskResult.data);
+ 
+       const notifResult = await getNotifications(Number(userID));
+       setNotifCount(notifResult.totalCount || 0);
+       setNotifications(notifResult.data);
+     } catch (error) {
+       console.error('Error retrieving user data:', error);
+     }
+   };
+ 
+   useEffect(() => {
+     fetchUserData();
+ 
+     // Toggle between 'Dictionary' and 'dictWord' every 3 seconds
+     const interval = setInterval(() => {
+       setShowSection((prev) => !prev);
+       setShowNotif((prev) => !prev);
+       setShowTask((prev) => !prev);
+       setShowLet((prev) => !prev);
+     }, 3000);
+ 
+     // Cleanup interval on unmount
+     return () => clearInterval(interval);
+   }, []);
+ 
+   useEffect(() => {
+     fetchUserData();
+     const unsubscribe = navigation.addListener('focus', fetchUserData);
+     return unsubscribe;
+   }, [navigation]);
+ 
+   const navigateToUnit = () => {
+     if (currentSection) {
+       const sectionId = currentSection.sectionId
+       const sectionName = currentSection.sectionNumber.toString();
+       unit.navigate('Unit', { sectionId, sectionName });
+     }
+   };
+ 
+   const navigateToLeaderboard = () => {
+     navigation.navigate("Leaderboard");
+   };
+ 
+ 
+   const openModal = (section: SectionDetails) => {
+     setCurrentSection(section);
+     setModalVisible(true);
+   };
+ 
+   const closeModal = () => {
+     setModalVisible(false);
+     setCurrentSection(null);
+   };
+ 
+   const opendailyTask = () => {
+     setdailyTaskVisible(true);
+   };
+ 
+   const closedailyTask = () => {
+     setdailyTaskVisible(false);
+   };
+ 
+   const closeLeaderBoard = () => {
+     setLeaderBoardVisible(false);
+   };
+ 
+   const openNotification = async () => {
+     setNotificationVisible(true);
+   };
+ 
+   const closeNotification = async () => {
+     await updateNotifications(userId);
+     setNotificationVisible(false);
+     fetchUserData();
+   };
+ 
+   async function claimRewardDashboard(taskId: number) {
+     setIsBuying(true);
+     setLoadingMessage("Please wait...");
+     await claimReward(userId, taskId);
+     fetchUserData();
+     setIsBuying(false);
+   }
+ 
+   const getTextSizeClass = (title: string) => {
+     const length = title.length;
+     if (length > 50) {
+       return 'text-sm';
+     } else if (length > 30) {
+       return 'text-lg';
+     } else {
+       return 'text-3xl';
+     }
+   };
+ 
+   const circleSize = 100; */
 
-const History: React.FC<Props> = ({ navigation, route }) => {
-    const [pieDataResult, setPieData] = useState<PronunciationProgressDto>();
-    const [currentContentId, setContentId] = useState<number | null>(null);
-    const [list, setList] = useState<PronunciationProgressListDto[]>([]);
-    const { contentId } = route.params;
+  return (
+    <SafeAreaView className="flex-1 bg-[#031527]">
+      {/* Top Navigation */}
+      <View className="absolute top-10 w-full px-5 flex-row justify-between">
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <HomeIcon className="h-6 w-6 text-white" />
+        </TouchableOpacity>
+      </View>
 
-    const [isToggled, setIsToggled] = useState(false);
-    const animatedPosition = useRef(new Animated.Value(0)).current;
+      {/* Page Title */}
+      <View className="items-center mt-16">
+        <Text className="text-white text-2xl font-bold">History Logs</Text>
+      </View>
 
-    const fetchLeaderboardData = async (toggled: boolean) => {
-        try {
-            console.log(toggled);
-            const userIdString = await AsyncStorage.getItem('userID');
-            if (userIdString) {
-                const result = await pronunciationProgressChart(parseInt(userIdString), toggled ? contentId : null);
-                setPieData(result.data);
-                const result2 = await pronunciationProgressList(parseInt(userIdString), toggled ? contentId : null);
-                setList(result2.data);
-            }
-        } catch (error) {
-            console.error('Error fetching leaderboard data:', error);
-        }
-    };
-
-    useFocusEffect(
-        React.useCallback(() => {
-            fetchLeaderboardData(false);
-        }, [contentId])
-    );
-
-    const handleToggle = () => {
-        const newState = !isToggled;
-        setIsToggled(newState);
-
-        Animated.timing(animatedPosition, {
-            toValue: newState ? 20 : 0,
-            duration: 200,
-            useNativeDriver: false,
-        }).start();
-
-        setContentId(newState ? contentId : null);
-        fetchLeaderboardData(newState); 
-    };
-
-
-    const pieData = [
-        { name: 'Correct', population: parseInt(pieDataResult?.correct ?? "0"), color: '#5CAC3C', legendFontColor: '#7F7F7F', legendFontSize: 15 },
-        { name: 'Incorrect', population: parseInt(pieDataResult?.incorrect ?? "0"), color: 'red', legendFontColor: '#7F7F7F', legendFontSize: 15 },
-    ];
-
-
-    const getCircleIconColor = (score: number) => {
-        return score === 0 ? 'red' : score === 1 ? 'green' : 'gray';
-    };
-
-    return (
-        <SafeAreaView className="flex-1">
-            <LinearGradient colors={['#6addd0', '#f7c188']} className="flex-1 items-center">
-                <View className="flex-row justify-between items-center mt-4 w-full px-5">
-                    <TouchableOpacity onPress={() => navigation.navigate('Practice')}>
-                        <BackIcon className="h-8 w-8 text-white" />
-                    </TouchableOpacity>
-                </View>
-                <View className="flex-1 mt-2">
-                    <Text className="text-4xl font-black text-white text-center">History</Text>
-
-                    <View className="flex-row items-center gap-x-2 mt-2 justify-end mr-5">
-                        <Text className="text-md text-white">Show Content History only</Text>
-                        <Switch
-                            value={isToggled}
-                            onValueChange={handleToggle}
-                            trackColor={{ false: '#E0E0E0', true: '#34D399' }}
-                            thumbColor={isToggled ? '#ffffff' : '#BDBDBD'}
-                            ios_backgroundColor="#E0E0E0"
-                            style={{ marginLeft: 10 }}
-                        />
-                    </View>
-                    <View className="">
-                        <PieChart
-                            data={pieData}
-                            width={screenWidth}
-                            height={200}
-                            chartConfig={{
-                                backgroundColor: '#ffffff',
-                                backgroundGradientFrom: '#f7c188',
-                                backgroundGradientTo: '#6addd0',
-                                color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                            }}
-                            accessor="population"
-                            backgroundColor="transparent"
-                            paddingLeft="15"
-                            absolute
-                        />
-                    </View>
-                </View>
-                <ScrollView
-                    className="bg-white rounded-xl mb-8 h-[16%]"
-                    contentContainerStyle={{
-                        paddingHorizontal: 30,
-                        paddingVertical: 15,
-                    }}
-                    showsVerticalScrollIndicator={false}
-                >
-                    <View className="space-y-3">
-                        <Text className="text-black text-3xl font-bold mb-2 mt-2 text-center px-16">History</Text>
-
-                        <View className="flex-row mb-2">
-                            <Text className="flex-1 font-bold text-black text-base text-center">Word</Text>
-                            <Text className="flex-1 font-bold text-black text-base text-center">Response</Text>
-                        </View>
-
-                        {list.map((item, index) => (
-                            <View
-                                key={index}
-                                className="bg-[#F2F0EF] p-4 rounded-lg shadow-lg mb-4"
-                                style={{
-                                    borderLeftWidth: 4,
-                                    borderLeftColor: getCircleIconColor(item.pronunciationScore) === 'green' ? 'green' : getCircleIconColor(item.pronunciationScore) === 'red' ? 'red' : 'gray',
-                                }}
-                            >
-                                <View className="flex-row items-center justify-between">
-                                    <Text className="flex-1 text-base text-black font-semibold">{item.contentText}</Text>
-                                    <View className="flex-1 flex-row justify-center items-center">
-                                        <CircleIcon
-                                            className={`h-5 w-5 text-${getCircleIconColor(item.pronunciationScore)}-500`}
-                                        />
-                                    </View>
-                                </View>
-                            </View>
-                        ))}
-                    </View>
-                </ScrollView>
-
-            </LinearGradient>
-        </SafeAreaView>
-    );
+      {/* History Logs Section */}
+      <View className="mt-10 px-6">
+        {/* Single History Item */}
+        <View className="mb-6">
+          <View className="items-end">
+            <Text className="text-white text-base">12-10-24 / 15:16</Text>
+          </View>
+          <View className="mt-4 flex-row items-center justify-center space-x-8">
+            <View className="items-center">
+              <Text className="text-white text-lg">Moisture</Text>
+              <Text className="text-white text-lg font-semibold">44%</Text>
+            </View>
+            <View className="items-center">
+              <Text className="text-white text-lg">Humidity</Text>
+              <Text className="text-white text-lg font-semibold">46%</Text>
+            </View>
+            <View className="items-center">
+              <Text className="text-white text-lg">Temperature</Text>
+              <Text className="text-white text-lg font-semibold">32°</Text>
+            </View>
+          </View>
+        </View>
+        {/* mo gawas ra anag border if more than one na ang logs */}
+        <View className="border-b-[1px] mx-1 border-white"></View>
+        {/* You can add more history items here */}
+      </View>
+    </SafeAreaView>
+  );
 };
 
 export default History;
