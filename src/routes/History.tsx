@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { SafeAreaView, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import { StackScreenProps } from '@react-navigation/stack';
 import { RootStackParamList } from '../../types';
@@ -24,6 +24,7 @@ const History: React.FC<Props> = ({ navigation }) => {
           humLevel: doc.data().humLevel,
           tempLevel: doc.data().tempLevel,
           moistLevel: doc.data().moistLevel,
+          method: doc.data().method
         }));
         setLogs(fetchedLogs);
       } catch (error) {
@@ -45,34 +46,38 @@ const History: React.FC<Props> = ({ navigation }) => {
 
       {/* Page Title */}
       <View className="px-6">
-      <View className="items-center mt-16">
-        <Text className="text-white text-2xl font-bold">History Logs</Text>
-      </View>
-      <View className="border-b-[1px] mx-1 border-white mt-8 "></View>
+        <View className="items-center mt-16">
+          <Text className="text-white text-2xl font-bold">History Logs</Text>
+        </View>
+
       </View>
       {/* History Logs Section */}
-      <View className="mt-6 px-6">
+      <ScrollView className="mt-6 px-6" style={{ maxHeight: 700 }} showsVerticalScrollIndicator={false}>
         {logs.map((log) => (
           <View key={log.id} className="mb-6">
             {/* Single History Item */}
-            <View className="items-end">
+            <View className="justify-between flex-row">
+              <View className="flex-row items-center space-x-2">
+                <Text className="text-white text-base font-bold">Method:</Text>
+                <Text className="text-white text-base">{log.method}</Text>
+              </View>
               <Text className="text-white text-base">{log.date}</Text>
             </View>
             <View className="mt-4 flex-row items-center justify-center space-x-8">
               <View className="items-center">
-                <Text className="text-white text-lg">Moisture</Text>
+                <Text className="text-white text-lg font-bold">Moisture</Text>
                 <Text className="text-white text-lg font-semibold">
                   {log.moistLevel}%
                 </Text>
               </View>
               <View className="items-center">
-                <Text className="text-white text-lg">Humidity</Text>
+                <Text className="text-white text-lg font-bold">Humidity</Text>
                 <Text className="text-white text-lg font-semibold">
                   {log.humLevel}%
                 </Text>
               </View>
               <View className="items-center">
-                <Text className="text-white text-lg">Temperature</Text>
+                <Text className="text-white text-lg font-bold">Temperature</Text>
                 <Text className="text-white text-lg font-semibold">
                   {log.tempLevel}°C
                 </Text>
@@ -82,7 +87,7 @@ const History: React.FC<Props> = ({ navigation }) => {
             <View className="border-b-[1px] mx-1 border-white mt-8"></View>
           </View>
         ))}
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
